@@ -22,7 +22,7 @@ public class TransactionManagerImpl implements TransactionManager {
     public static final long SUPER_XID = 0;    // 超级事务，永远为commited状态
     static final String XID_SUFFIX = ".xid";    // XID 文件后缀
 
-    private RandomAccessFile file;
+    private RandomAccessFile file;  //允许以随机访问的方式读写文件
     private FileChannel fc;
     private long xidCounter; //xidCounter用于记录事务的数量
     private Lock counterLock;
@@ -81,17 +81,11 @@ public class TransactionManagerImpl implements TransactionManager {
     }
 
 
-    /*
-    begin()方法会开始一个事务并返回XID,更具体的:
-    1.开启一个事务，xidCounter为事务的计数器+1，并赋值xid
-    2.更新这个事务为active，表示事务已经开始执行。
-    3.调用incrXIDCounter方法，更新xid文件头
-    4.返回xid
-     */
+    //开启一个事务
     public long begin() {
         counterLock.lock();
         try {
-            // xidCounter是当前事务的计数器，每开始一个新的事务，就将其加1
+            // 生成一个新的事务id
             long xid = xidCounter + 1;
             // 调用updateXID方法，将新的事务ID和事务状态（这里是活动状态）写入到XID文件中
             updateXID(xid, FIELD_TRAN_ACTIVE);
@@ -110,7 +104,7 @@ public class TransactionManagerImpl implements TransactionManager {
         ByteBuffer buf = ByteBuffer.wrap(tmp);  // 使用ByteBuffer包装字节数组以进行I/O操作
         try {
             fc.position(offset);  // 设置文件通道的位置到事务状态需要更新的位置
-            fc.write(buf);  // 将事务状态写入文件通道
+            fc.write(buf);        // 将事务状态写入文件通道
         } catch (IOException e) {
             Panic.panic(e);
         }
@@ -122,7 +116,7 @@ public class TransactionManagerImpl implements TransactionManager {
     }
 
 
-    // 将XID加一，并更新XID Header
+    // 全局更新计数器-将XID加一，并更新XID Header
     private void incrXIDCounter() {
         xidCounter++;
         // 将新的XID计数器转换为字节格式，以便写入文件

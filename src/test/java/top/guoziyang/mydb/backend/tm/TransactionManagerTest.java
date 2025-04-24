@@ -33,6 +33,8 @@ public class TransactionManagerTest {
     // 用于等待所有工作线程完成的计数器。
     private CountDownLatch cdl;
 
+
+
     /**
      * 测试多线程环境下事务管理器的性能和正确性。
      */
@@ -58,6 +60,7 @@ public class TransactionManagerTest {
         // 测试完成后，删除事务管理文件。
         assert new File("D:/Code/MYDB/tmp/mydb/tranmger_test.xid").delete();
     }
+
 
     /**
      * 工作线程执行的事务操作方法。
@@ -121,5 +124,8 @@ public class TransactionManagerTest {
         }
         // 工作线程完成任务，计数器减一。
         cdl.countDown();
+
     }
+
+
 }
